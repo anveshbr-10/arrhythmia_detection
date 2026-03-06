@@ -1,0 +1,20 @@
+/data
+
+
+# =========================
+# Backend (Python / ML)
+# =========================
+# Environments
+venv/
+/.env
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Datasets and Large Models
+*.csv
+*.h5
+*.keras
+
+backend/best_model.keras
+backend/best_model_checkpoint.keras
