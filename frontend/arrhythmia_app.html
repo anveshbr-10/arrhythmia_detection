@@ -284,7 +284,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
   animation:slideUp 0.5s ease both;box-shadow:0 2px 8px rgba(47,143,137,0.07);}
 .metric:nth-child(1){animation-delay:0.05s}.metric:nth-child(2){animation-delay:0.1s}.metric:nth-child(3){animation-delay:0.15s}
 .m-name{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent);margin-bottom:8px}
-.m-val{font-size:1.7rem;font-weight:800;color:var(--white);line-height:1;margin-bottom:2px}
+.m-val{font-size:1.7rem;font-weight:800;color:var(--text);line-height:1;margin-bottom:2px}
 .m-unit{font-size:0.7rem;color:var(--muted)}
 .m-bar{height:3px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden}
 .m-fill{height:100%;border-radius:2px;width:0;transition:width 1.1s cubic-bezier(0.4,0,0.2,1)}
@@ -632,29 +632,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
           <div class="class-panel">
             <div class="section-title" style="margin-bottom:14px">Class Probability Breakdown</div>
             <div id="clsRows"></div>
-          </div>
-
-          <!-- MYOCARDIAL INFARCTION PANEL -->
-          <div id="miPanel" class="class-panel" style="display:none;border-left:3px solid #e05c6e;">
-            <div class="section-title" style="margin-bottom:14px;color:#c0394e;">⚠ Myocardial Infarction Risk Indicators</div>
-            <div style="background:rgba(224,92,110,0.05);border:1px solid rgba(224,92,110,0.2);border-radius:10px;padding:14px 16px;margin-bottom:14px;">
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-                <span style="font-size:1.4rem;">🫀</span>
-                <div>
-                  <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#c0394e;">MI Risk Assessment</div>
-                  <div id="miRiskLabel" style="font-size:1.1rem;font-weight:800;color:#c0394e;">—</div>
-                </div>
-                <div style="margin-left:auto;text-align:right;">
-                  <div id="miRiskPct" style="font-size:2rem;font-weight:800;color:#c0394e;">—</div>
-                  <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;">Risk Score</div>
-                </div>
-              </div>
-            </div>
-            <div style="font-size:0.8rem;color:var(--muted);line-height:1.7;margin-bottom:14px;" id="miDesc">—</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" id="miIndicators"></div>
-            <div style="margin-top:14px;padding:10px 14px;background:rgba(47,163,154,0.06);border:1px solid rgba(47,163,154,0.2);border-radius:8px;font-size:0.72rem;color:var(--muted);line-height:1.6;">
-              <strong style="color:var(--accent)">Note:</strong> This MI risk assessment is derived from ECG pattern analysis only. It does not replace clinical evaluation, troponin levels, or full 12-lead ECG interpretation. Consult a cardiologist for definitive diagnosis.
-            </div>
           </div>
         </div>
 
@@ -1202,9 +1179,6 @@ function renderResults(r) {
   document.getElementById('rConf').textContent = conf + '%';
   document.getElementById('rStatus').textContent = cls.statusText;
 
-  // ── MYOCARDIAL INFARCTION RISK PANEL ──
-  renderMIPanel(classKey, conf);
-
   // Animate bars
   setTimeout(()=>{
     document.getElementById('mPredf').style.width  = conf + '%';
@@ -1230,66 +1204,6 @@ function renderResults(r) {
   setTimeout(()=>{
     document.querySelectorAll('.cls-bar-fill').forEach(el=>{ el.style.width = el.dataset.w + '%'; });
   },200);
-}
-
-// ── MYOCARDIAL INFARCTION RISK PANEL ────────────
-function renderMIPanel(classKey, conf) {
-  const panel = document.getElementById('miPanel');
-
-  // MI risk mapping: higher for ventricular, moderate for others, low for normal
-  const MI_RISK = {
-    ventricular:      { show:true,  riskPct:72, label:'Elevated Risk',   color:'#c0394e',
-      desc:'Ventricular arrhythmias are strongly associated with ischemic heart disease and myocardial infarction. ST-segment changes, Q-waves, and abnormal T-wave patterns seen in ventricular ECG signals may indicate active or prior MI. Urgent cardiological evaluation is advised.',
-      indicators:[
-        {name:'ST Segment Changes', val:'Likely', risk:true},
-        {name:'Q-Wave Abnormality', val:'Possible', risk:true},
-        {name:'T-Wave Inversion', val:'Possible', risk:true},
-        {name:'Ischemic Pattern', val:'Suspected', risk:true},
-      ]},
-    supraventricular: { show:true,  riskPct:28, label:'Moderate Concern', color:'#e07a00',
-      desc:'Supraventricular arrhythmias can occur secondary to myocardial ischemia or as a complication of MI. While not directly diagnostic of MI, the presence of SVT, atrial flutter, or AF may indicate underlying structural heart disease. Clinical correlation is recommended.',
-      indicators:[
-        {name:'ST Segment Changes', val:'Possible', risk:true},
-        {name:'Q-Wave Abnormality', val:'Unlikely', risk:false},
-        {name:'Atrial Ischemia', val:'Possible', risk:true},
-        {name:'Ischemic Pattern', val:'Low', risk:false},
-      ]},
-    fusion:           { show:true,  riskPct:38, label:'Monitor Closely',  color:'#cc7700',
-      desc:'Fusion beats can be associated with ventricular ectopy in the setting of ischemia. Their presence alongside other abnormal beats may suggest increased myocardial irritability. A full clinical workup is recommended to rule out ischemic etiology.',
-      indicators:[
-        {name:'ST Segment Changes', val:'Possible', risk:true},
-        {name:'Ectopic Activity', val:'Present', risk:true},
-        {name:'Conduction Delay', val:'Possible', risk:true},
-        {name:'Ischemic Pattern', val:'Low–Moderate', risk:false},
-      ]},
-    normal:           { show:false, riskPct:4,  label:'Low Risk',         color:'#2f8f65', desc:'', indicators:[] },
-    unknown:          { show:true,  riskPct:20, label:'Indeterminate',     color:'#6B7C7C',
-      desc:'The signal quality or beat morphology is insufficient to rule out MI-related changes. Repeat the analysis with a cleaner signal, or proceed to a full 12-lead ECG and clinical evaluation.',
-      indicators:[
-        {name:'ST Segment Changes', val:'Undetectable', risk:false},
-        {name:'Q-Wave Abnormality', val:'Undetectable', risk:false},
-        {name:'Signal Quality', val:'Poor', risk:true},
-        {name:'Ischemic Pattern', val:'Indeterminate', risk:false},
-      ]},
-  };
-
-  const mi = MI_RISK[classKey];
-  if (!mi || !mi.show) { panel.style.display = 'none'; return; }
-
-  panel.style.display = 'block';
-  document.getElementById('miRiskLabel').textContent = mi.label;
-  document.getElementById('miRiskLabel').style.color = mi.color;
-  document.getElementById('miRiskPct').textContent = mi.riskPct + '%';
-  document.getElementById('miRiskPct').style.color = mi.color;
-  document.getElementById('miDesc').textContent = mi.desc;
-  document.getElementById('miIndicators').innerHTML = mi.indicators.map(ind =>
-    '<div style="background:' + (ind.risk ? 'rgba(224,92,110,0.05)' : 'rgba(76,175,125,0.05)') +
-    ';border:1px solid ' + (ind.risk ? 'rgba(224,92,110,0.2)' : 'rgba(76,175,125,0.2)') +
-    ';border-radius:8px;padding:10px 12px;">' +
-    '<div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:3px">' + ind.name + '</div>' +
-    '<div style="font-size:0.82rem;font-weight:700;color:' + (ind.risk ? '#c0394e' : 'var(--green)') + '">' + ind.val + '</div>' +
-    '</div>'
-  ).join('');
 }
 
 // ── HISTORY ──────────────────────────────────────
